@@ -13,6 +13,7 @@ struct NotchAgentStrings {
     let liveCard: String
     let trendCard: String
     let modelsCard: String
+    let harnessesCard: String
     let projectsCard: String
     let activityCard: String
     let today: String
@@ -144,6 +145,7 @@ struct NotchAgentStrings {
         case .live: return liveCard
         case .trend: return trendCard
         case .models: return modelsCard
+        case .harnesses: return harnessesCard
         case .projects: return projectsCard
         case .activity: return activityCard
         case .resets: return resetsCard
@@ -201,6 +203,7 @@ extension NotchAgentStrings {
         liveCard: "Now",
         trendCard: "Trend",
         modelsCard: "Models",
+        harnessesCard: "Harnesses",
         projectsCard: "Projects",
         activityCard: "Activity",
         today: "Today",
@@ -300,6 +303,7 @@ extension NotchAgentStrings {
         liveCard: "Зараз",
         trendCard: "Тенденція",
         modelsCard: "Моделі",
+        harnessesCard: "Harnesses",
         projectsCard: "Проєкти",
         activityCard: "Активність",
         today: "Сьогодні",
@@ -399,6 +403,7 @@ extension NotchAgentStrings {
         liveCard: "Agora",
         trendCard: "Tendência",
         modelsCard: "Modelos",
+        harnessesCard: "Harnesses",
         projectsCard: "Projetos",
         activityCard: "Atividade",
         today: "Hoje",
@@ -498,6 +503,7 @@ extension NotchAgentStrings {
         liveCard: "Ahora",
         trendCard: "Tendencia",
         modelsCard: "Modelos",
+        harnessesCard: "Harnesses",
         projectsCard: "Proyectos",
         activityCard: "Actividad",
         today: "Hoy",
@@ -597,6 +603,7 @@ extension NotchAgentStrings {
         liveCard: "Teraz",
         trendCard: "Vývoj",
         modelsCard: "Modely",
+        harnessesCard: "Harnesses",
         projectsCard: "Projekty",
         activityCard: "Aktivita",
         today: "Dnes",
@@ -696,6 +703,7 @@ extension NotchAgentStrings {
         liveCard: "Jetzt",
         trendCard: "Verlauf",
         modelsCard: "Modelle",
+        harnessesCard: "Harnesses",
         projectsCard: "Projekte",
         activityCard: "Aktivität",
         today: "Heute",
@@ -795,6 +803,7 @@ extension NotchAgentStrings {
         liveCard: "En cours",
         trendCard: "Tendance",
         modelsCard: "Modèles",
+        harnessesCard: "Harnesses",
         projectsCard: "Projets",
         activityCard: "Activité",
         today: "Aujourd’hui",
@@ -894,6 +903,7 @@ extension NotchAgentStrings {
         liveCard: "Adesso",
         trendCard: "Andamento",
         modelsCard: "Modelli",
+        harnessesCard: "Harnesses",
         projectsCard: "Progetti",
         activityCard: "Attività",
         today: "Oggi",
@@ -993,6 +1003,7 @@ extension NotchAgentStrings {
         liveCard: "Сейчас",
         trendCard: "Динамика",
         modelsCard: "Модели",
+        harnessesCard: "Harnesses",
         projectsCard: "Проекты",
         activityCard: "Активность",
         today: "Сегодня",
@@ -1092,6 +1103,7 @@ extension NotchAgentStrings {
         liveCard: "Şimdi",
         trendCard: "Eğilim",
         modelsCard: "Modeller",
+        harnessesCard: "Harnesses",
         projectsCard: "Projeler",
         activityCard: "Etkinlik",
         today: "Bugün",
@@ -1191,6 +1203,7 @@ extension NotchAgentStrings {
         liveCard: "実行中",
         trendCard: "推移",
         modelsCard: "モデル",
+        harnessesCard: "Harnesses",
         projectsCard: "プロジェクト",
         activityCard: "アクティビティ",
         today: "今日",
@@ -1290,6 +1303,7 @@ extension NotchAgentStrings {
         liveCard: "지금",
         trendCard: "추이",
         modelsCard: "모델",
+        harnessesCard: "Harnesses",
         projectsCard: "프로젝트",
         activityCard: "활동",
         today: "오늘",
@@ -1389,6 +1403,7 @@ extension NotchAgentStrings {
         liveCard: "当前",
         trendCard: "趋势",
         modelsCard: "模型",
+        harnessesCard: "Harnesses",
         projectsCard: "项目",
         activityCard: "活动",
         today: "今天",
@@ -1488,6 +1503,7 @@ extension NotchAgentStrings {
         liveCard: "目前",
         trendCard: "趨勢",
         modelsCard: "模型",
+        harnessesCard: "Harnesses",
         projectsCard: "專案",
         activityCard: "活動",
         today: "今天",
@@ -1587,6 +1603,7 @@ extension NotchAgentStrings {
         liveCard: "目前",
         trendCard: "趨勢",
         modelsCard: "模型",
+        harnessesCard: "Harnesses",
         projectsCard: "項目",
         activityCard: "活動",
         today: "今天",

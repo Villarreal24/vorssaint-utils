@@ -38,6 +38,16 @@ enum AgentProvider: String, CaseIterable, Identifiable, Codable {
     /// Whether the provider records a plan allowance in its local logs.
     var reportsLimits: Bool { self != .copilot && self != .cursor && self != .pi }
 
+    /// The harness row this provider's usage has in Harnesses; nil for agents
+    /// that row does not cover.
+    var harnessName: String? {
+        switch self {
+        case .claude: return "Claude Code"
+        case .pi: return "Pi"
+        default: return nil
+        }
+    }
+
     /// The agent whose card shows this provider's usage.
     var card: AgentProvider { self == .pi ? .claude : self }
 

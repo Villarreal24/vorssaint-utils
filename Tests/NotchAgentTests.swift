@@ -3273,7 +3273,7 @@ enum NotchAgentTests {
 
         defaults.set("trend,unknown,trend,spend", forKey: DefaultsKey.notchAgentsCardOrder)
         defaults.set("activity,projects", forKey: DefaultsKey.notchAgentsHiddenCards)
-        suite.expect(NotchAgentSupport.cards(in: defaults) == [.trend, .spend, .limits, .live, .models, .resets],
+        suite.expect(NotchAgentSupport.cards(in: defaults) == [.trend, .spend, .limits, .live, .models, .resets, .harnesses],
                      "the saved order ignores unknown and repeated cards and appends new ones")
         defaults.set(false, forKey: DefaultsKey.notchAgentsCodex)
         suite.expect(NotchAgentSupport.providers(in: defaults) == [.claude, .opencode, .copilot, .cursor], "an agent can be left out")
@@ -3364,7 +3364,7 @@ enum NotchAgentTests {
                      "cards pair in reading order, and charts and lone cards take the row")
         suite.expect(NotchAgentSupport.rows([limits, codex], width: 330) == [[limits], [codex]],
                      "a narrow island stacks every card")
-        suite.expect(NotchAgentCard.allCases.filter(\.followsPeriod) == [.spend, .trend, .models, .projects],
+        suite.expect(NotchAgentCard.allCases.filter(\.followsPeriod) == [.spend, .trend, .models, .projects, .harnesses],
                      "the period in the island's top row covers spending, the trend, models and projects")
         suite.expect(NotchAgentSupport.contentHeight([[limits, codex], [trend]])
                         == NotchAgentSupport.cardHeight + NotchAgentSupport.spacing + NotchAgentSupport.chartHeight

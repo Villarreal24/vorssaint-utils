@@ -62,6 +62,8 @@ struct AgentPeriodUsage: Equatable {
     var byProvider: [AgentProvider: AgentTotals] = [:]
     var models: [AgentShare] = []
     var projects: [AgentShare] = []
+    /// Claude Code and Pi apart, which the other rows combine under Claude.
+    var harnesses: [AgentShare] = []
 
     /// Whether every recorded usage entry in the period could be priced.
     var fullyPriced: Bool { total.unpriced == 0 }
@@ -229,6 +231,7 @@ enum AgentUsageSummary {
         var periods: [AgentPeriod: AgentPeriodUsage] = [:]
         var models: [AgentPeriod: [String: AgentShare]] = [:]
         var projects: [AgentPeriod: [String: AgentShare]] = [:]
+        var harnesses: [AgentPeriod: [String: AgentShare]] = [:]
         var claude: [AgentUsageRecord] = []
         var names: [String: String] = [:]
         let recent = now.addingTimeInterval(-burnWindow)
@@ -276,6 +279,11 @@ enum AgentUsageSummary {
                         id: record.project, name: record.project, provider: nil, totals: AgentTotals())]
                         .totals.add(record)
                 }
+                if let harness = record.provider.harnessName {
+                    harnesses[period, default: [:]][record.provider.rawValue, default: AgentShare(
+                        id: "harness:" + record.provider.rawValue, name: harness, provider: record.provider,
+                        totals: AgentTotals())].totals.add(record)
+                }
             }
         }
         for period in AgentPeriod.allCases {
@@ -283,6 +291,7 @@ enum AgentUsageSummary {
             let byCost = usage.fullyPriced
             usage.models = sorted(models[period].map { Array($0.values) } ?? [], byCost: byCost)
             usage.projects = sorted(projects[period].map { Array($0.values) } ?? [], byCost: byCost)
+            usage.harnesses = sorted(harnesses[period].map { Array($0.values) } ?? [], byCost: byCost)
             periods[period] = usage
         }
         for provider in Array(snapshot.burnRate.keys) {
@@ -361,6 +370,7 @@ final class AgentUsageSummaryCache {
     private var providers: Set<AgentProvider> = []
     private var models: [AgentPeriod: [String: AgentShare]] = [:]
     private var projects: [AgentPeriod: [String: AgentShare]] = [:]
+    private var harnesses: [AgentPeriod: [String: AgentShare]] = [:]
     private var names: [String: String] = [:]
     private var starts: [Date] = []
     private var hourStarts: [Date] = []
@@ -397,6 +407,7 @@ final class AgentUsageSummaryCache {
             self.providers = providers
             models.removeAll(keepingCapacity: true)
             projects.removeAll(keepingCapacity: true)
+            harnesses.removeAll(keepingCapacity: true)
             names.removeAll(keepingCapacity: true)
             recentPositions.removeAll(keepingCapacity: true)
             history = AgentUsageSummary.snapshot(records: [], limits: [:], live: [], plans: [:],
@@ -422,6 +433,8 @@ final class AgentUsageSummaryCache {
                     models[period].map { Array($0.values) } ?? [], byCost: byCost)
                 history!.periods[period]!.projects = AgentUsageSummary.sorted(
                     projects[period].map { Array($0.values) } ?? [], byCost: byCost)
+                history!.periods[period]!.harnesses = AgentUsageSummary.sorted(
+                    harnesses[period].map { Array($0.values) } ?? [], byCost: byCost)
             }
         }
         changes.removeAll(keepingCapacity: true)
@@ -498,6 +511,11 @@ final class AgentUsageSummaryCache {
             if !record.project.isEmpty {
                 projects[period, default: [:]][record.project, default: AgentShare(
                     id: record.project, name: record.project, provider: nil, totals: AgentTotals())].totals += delta
+            }
+            if let harness = record.provider.harnessName {
+                harnesses[period, default: [:]][record.provider.rawValue, default: AgentShare(
+                    id: "harness:" + record.provider.rawValue, name: harness, provider: record.provider,
+                    totals: AgentTotals())].totals += delta
             }
         }
     }

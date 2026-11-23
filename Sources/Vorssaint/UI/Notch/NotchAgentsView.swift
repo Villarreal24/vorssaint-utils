@@ -130,6 +130,9 @@ struct NotchAgentsView: View {
         case .models:
             NotchAgentShareCard(title: text.modelsCard, symbol: NotchAgentCard.models.symbol,
                                 shares: snapshot.usage(shown).models, byCost: snapshot.usage(shown).fullyPriced, text: text)
+        case .harnesses:
+            NotchAgentShareCard(title: text.harnessesCard, symbol: NotchAgentCard.harnesses.symbol,
+                                shares: snapshot.usage(shown).harnesses, byCost: snapshot.usage(shown).fullyPriced, text: text)
         case .projects:
             NotchAgentShareCard(title: text.projectsCard, symbol: NotchAgentCard.projects.symbol,
                                 shares: snapshot.usage(shown).projects, byCost: snapshot.usage(shown).fullyPriced, text: text)

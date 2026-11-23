@@ -81,6 +81,17 @@ enum PiUsageTests {
         suite.expect(today.models.first { $0.name == AgentPricing.displayName("claude-sonnet-5-5") }
                         .map { close($0.totals.cost, 10.39 + 1.5 + 0.11) } == true, "the Sonnet row holds both agents' cost")
 
+        // Harnesses: same model, two origins, two rows; Spending stays combined.
+        let harnesses = today.harnesses
+        suite.expect(harnesses.map(\.name).sorted() == ["Claude Code", "Pi"], "Harnesses lists Claude Code and Pi apart: \(harnesses.map(\.name))")
+        suite.expect(harnesses.first { $0.name == "Claude Code" }.map { close($0.totals.cost, 10.39 + 1) && $0.totals.tokens.total == 710 + 20 } == true,
+                     "the Claude Code row holds only Claude Code's cost and tokens")
+        suite.expect(harnesses.first { $0.name == "Pi" }.map { close($0.totals.cost, 2.11) && $0.totals.tokens.total == 1604 + 903 + 1604 } == true,
+                     "the Pi row holds only Pi's cost and exact tokens")
+        suite.expect(close(harnesses.reduce(0.0) { $0 + $1.totals.cost }, today.total.cost), "Harnesses add up to Spending")
+        suite.expect(AgentUsageStore().snapshot(plans: [:], providers: [.claude, .pi], now: now, calendar: calendar)
+                        .usage(.today).harnesses.isEmpty, "Harnesses is empty without use")
+
         // Periods: a record from last month is outside today and the week.
         let old = AgentUsageStore()
         parse([header, message(id: "o1", response: "msg_old", at: "2026-10-30T15:00:00.000Z")], into: old, file: "/pi/old.jsonl", state: &state)
