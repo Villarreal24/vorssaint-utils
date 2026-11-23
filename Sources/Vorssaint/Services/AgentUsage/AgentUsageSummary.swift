@@ -235,19 +235,25 @@ enum AgentUsageSummary {
         let lastDay = starts.count - 1
 
         for record in records where providers.contains(record.provider) {
-            snapshot.seen.insert(record.provider)
-            snapshot.lastActivity[record.provider] = max(snapshot.lastActivity[record.provider] ?? .distantPast, record.date)
+            // Pi's usage counts with Claude's spending and history, but never
+            // with what describes the Claude account or what is happening now.
+            let shown = record.provider.card
+            let owned = record.provider == shown
+            snapshot.seen.insert(shown)
+            if owned {
+                snapshot.lastActivity[record.provider] = max(snapshot.lastActivity[record.provider] ?? .distantPast, record.date)
+            }
             if record.provider == .claude, record.date > now.addingTimeInterval(-blockHistory), record.date <= now {
                 claude.append(record)
             }
-            if record.date >= recent, record.date <= now {
+            if owned, record.date >= recent, record.date <= now {
                 snapshot.burnRate[record.provider, default: AgentTotals()].add(record)
             }
             guard let first = starts.first, record.date >= first, record.date < tomorrow,
                   let day = index(of: record.date, in: starts) else { continue }
-            days[day].byProvider[record.provider, default: AgentTotals()].add(record)
+            days[day].byProvider[shown, default: AgentTotals()].add(record)
             if day == lastDay, let hour = index(of: record.date, in: hourStarts) {
-                hours[hour].byProvider[record.provider, default: AgentTotals()].add(record)
+                hours[hour].byProvider[shown, default: AgentTotals()].add(record)
             }
             // One name per model string, not per response: the history can
             // hold tens of thousands of them.
@@ -258,12 +264,12 @@ enum AgentUsageSummary {
                 name = AgentPricing.displayName(record.model)
                 names[record.model] = name
             }
-            let modelID = record.provider.rawValue + ":" + name
+            let modelID = shown.rawValue + ":" + name
             for period in AgentPeriod.allCases where day > lastDay - period.days {
                 periods[period, default: AgentPeriodUsage()].total.add(record)
-                periods[period, default: AgentPeriodUsage()].byProvider[record.provider, default: AgentTotals()].add(record)
+                periods[period, default: AgentPeriodUsage()].byProvider[shown, default: AgentTotals()].add(record)
                 models[period, default: [:]][modelID, default: AgentShare(
-                    id: modelID, name: name.isEmpty ? "?" : name, provider: record.provider, totals: AgentTotals())]
+                    id: modelID, name: name.isEmpty ? "?" : name, provider: shown, totals: AgentTotals())]
                     .totals.add(record)
                 if !record.project.isEmpty {
                     projects[period, default: [:]][record.project, default: AgentShare(
@@ -451,6 +457,7 @@ final class AgentUsageSummaryCache {
 
     private func isRecent(_ record: AgentUsageRecord, now: Date) -> Bool {
         guard providers.contains(record.provider) else { return false }
+        guard record.provider != .pi else { return false }
         return record.provider == .claude
             ? record.date > now.addingTimeInterval(-AgentUsageSummary.blockHistory)
             : record.date >= now.addingTimeInterval(-AgentUsageSummary.burnWindow)
@@ -459,8 +466,11 @@ final class AgentUsageSummaryCache {
     private func accumulate(_ record: AgentUsageRecord, previous: AgentUsageRecord?) {
         guard providers.contains(record.provider) else { return }
         accumulatedRecords += 1
-        history!.seen.insert(record.provider)
-        history!.lastActivity[record.provider] = max(history!.lastActivity[record.provider] ?? .distantPast, record.date)
+        let shown = record.provider.card
+        history!.seen.insert(shown)
+        if record.provider == shown {
+            history!.lastActivity[shown] = max(history!.lastActivity[shown] ?? .distantPast, record.date)
+        }
         guard record.date < tomorrow, let day = AgentUsageSummary.index(of: record.date, in: starts) else { return }
         var delta = AgentTotals()
         delta.add(record)
@@ -473,18 +483,18 @@ final class AgentUsageSummaryCache {
             delta.requests -= previous.requests
             delta.unpriced -= previous.cost == nil ? 1 : 0
         }
-        history!.days[day].byProvider[record.provider, default: AgentTotals()] += delta
+        history!.days[day].byProvider[shown, default: AgentTotals()] += delta
         if day == starts.count - 1, let hour = AgentUsageSummary.index(of: record.date, in: hourStarts) {
-            history!.hours[hour].byProvider[record.provider, default: AgentTotals()] += delta
+            history!.hours[hour].byProvider[shown, default: AgentTotals()] += delta
         }
         let name = names[record.model] ?? AgentPricing.displayName(record.model)
         names[record.model] = name
-        let modelID = record.provider.rawValue + ":" + name
+        let modelID = shown.rawValue + ":" + name
         for period in AgentPeriod.allCases where day > starts.count - 1 - period.days {
             history!.periods[period]!.total += delta
-            history!.periods[period]!.byProvider[record.provider, default: AgentTotals()] += delta
+            history!.periods[period]!.byProvider[shown, default: AgentTotals()] += delta
             models[period, default: [:]][modelID, default: AgentShare(
-                id: modelID, name: name.isEmpty ? "?" : name, provider: record.provider, totals: AgentTotals())].totals += delta
+                id: modelID, name: name.isEmpty ? "?" : name, provider: shown, totals: AgentTotals())].totals += delta
             if !record.project.isEmpty {
                 projects[period, default: [:]][record.project, default: AgentShare(
                     id: record.project, name: record.project, provider: nil, totals: AgentTotals())].totals += delta

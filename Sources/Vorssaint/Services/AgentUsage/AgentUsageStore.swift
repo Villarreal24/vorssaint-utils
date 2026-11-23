@@ -105,7 +105,7 @@ final class AgentUsageStore {
             case .usage(let key, let record, let billable):
                 // Copilot's session totals and Cursor's occasional metered replies
                 // do not describe a complete live turn.
-                let historyOnly = provider == .copilot || (provider == .cursor && key.hasPrefix("cursor-transcript:"))
+                let historyOnly = provider == .copilot || provider == .pi || (provider == .cursor && key.hasPrefix("cursor-transcript:"))
                 let turn = historyOnly ? nil : tracksTurns ? file : parent
                 add(record, billable: billable, key: key, source: file, turn: turn, subagent: !tracksTurns)
             case .usageModel(let key, let model):
@@ -237,7 +237,7 @@ final class AgentUsageStore {
             let pricingChanged = record.provider == .codex && (tier != previous.serviceTier || date != old.date
                 || assumesStandardTier != previous.assumesStandardTier || hasEventTimestamp != previous.hasEventTimestamp)
             if merged == old.tokens && !pricingChanged {
-                if record.provider == .opencode {
+                if record.provider.recordsCost {
                     let newCost: Double?
                     let isReported: Bool
                     if record.reportedCost {
@@ -278,7 +278,7 @@ final class AgentUsageStore {
             let priced = AgentPricing.cost(combined, model: old.model, at: hasEventTimestamp ? date : nil)
             let newCost: Double?
             let isReported: Bool
-            if record.provider == .opencode {
+            if record.provider.recordsCost {
                 if record.reportedCost {
                     newCost = record.cost
                     isReported = true
@@ -639,12 +639,22 @@ struct AgentLogRoot: Equatable {
         let claude = providers.contains(.claude) ? claudeProfile.logURLs(home: home).map {
             AgentLogRoot(provider: .claude, url: canonical($0))
         } : []
-        return claude + [(AgentProvider.codex, ".codex/sessions"), (.codex, ".codex/archived_sessions"),
+        let others = [(AgentProvider.codex, ".codex/sessions"), (.codex, ".codex/archived_sessions"),
          (.opencode, ".local/share/opencode"), (.copilot, ".copilot/session-state"),
-         (.cursor, ".cursor/projects")].compactMap { provider, path in
+         (.cursor, ".cursor/projects")].compactMap { provider, path -> AgentLogRoot? in
             guard providers.contains(provider) else { return nil }
             return AgentLogRoot(provider: provider, url: canonical(home.appending(path: path, directoryHint: .isDirectory)))
         }
+        return claude + others + (providers.contains(.pi) ? piRoots(home: home) : [])
+    }
+
+    /// Where Gentle-Pi and Pi keep their sessions. Folders that resolve to
+    /// the same place are read once.
+    static func piRoots(home: URL) -> [AgentLogRoot] {
+        var seen = Set<String>()
+        return [".local/share/gentle-shell/install/agent/sessions", ".gentle-shell/agent/sessions", ".pi/agent/sessions"]
+            .map { AgentLogRoot(provider: .pi, url: canonical(home.appending(path: $0, directoryHint: .isDirectory))) }
+            .filter { seen.insert($0.url.path).inserted }
     }
 
     /// The path the file system reports for `url`; the path as given while

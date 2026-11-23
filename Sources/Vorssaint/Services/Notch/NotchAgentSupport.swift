@@ -85,9 +85,10 @@ enum NotchAgentSupport {
             && NotchSupport.modules(in: defaults).contains(.agents)
     }
 
+    /// The agents with a card, as switched on in Settings.
     static func providers(in defaults: UserDefaults = .standard) -> [AgentProvider] {
         AgentProvider.allCases.filter {
-            defaults.object(forKey: key(for: $0)) as? Bool ?? true
+            $0 != .pi && defaults.object(forKey: key(for: $0)) as? Bool ?? true
         }
     }
 
@@ -101,9 +102,15 @@ enum NotchAgentSupport {
         }
     }
 
+    /// The providers whose logs are read: Pi's follow Claude's setting.
+    static func readers(in defaults: UserDefaults = .standard) -> [AgentProvider] {
+        let wanted = providers(in: defaults)
+        return wanted.contains(.claude) ? wanted + [.pi] : wanted
+    }
+
     static func key(for provider: AgentProvider) -> String {
         switch provider {
-        case .claude: return DefaultsKey.notchAgentsClaude
+        case .claude, .pi: return DefaultsKey.notchAgentsClaude
         case .codex: return DefaultsKey.notchAgentsCodex
         case .opencode: return DefaultsKey.notchAgentsOpenCode
         case .copilot: return DefaultsKey.notchAgentsCopilot

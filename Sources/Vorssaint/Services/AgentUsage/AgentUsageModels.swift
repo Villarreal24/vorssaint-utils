@@ -7,6 +7,9 @@ import Foundation
 /// product names and stay untranslated.
 enum AgentProvider: String, CaseIterable, Identifiable, Codable {
     case claude, codex, opencode, copilot, cursor
+    /// Pi sessions, read only while Claude is on. Their Anthropic usage counts
+    /// with Claude's API value; they have no card, limits or turns of their own.
+    case pi
 
     var id: String { rawValue }
 
@@ -17,6 +20,7 @@ enum AgentProvider: String, CaseIterable, Identifiable, Codable {
         case .opencode: return "OpenCode"
         case .copilot: return "GitHub Copilot"
         case .cursor: return "Cursor"
+        case .pi: return "Pi"
         }
     }
 
@@ -27,11 +31,19 @@ enum AgentProvider: String, CaseIterable, Identifiable, Codable {
         case .opencode: return "terminal"
         case .copilot: return "infinity"
         case .cursor: return "cursorarrow"
+        case .pi: return "sparkle"
         }
     }
 
     /// Whether the provider records a plan allowance in its local logs.
-    var reportsLimits: Bool { self != .copilot && self != .cursor }
+    var reportsLimits: Bool { self != .copilot && self != .cursor && self != .pi }
+
+    /// The agent whose card shows this provider's usage.
+    var card: AgentProvider { self == .pi ? .claude : self }
+
+    /// Whether the provider's own logs record what a response cost, which
+    /// then outranks the list price.
+    var recordsCost: Bool { self == .opencode || self == .pi }
 }
 
 /// Token counts in the shape both logs can be reduced to. `input` excludes

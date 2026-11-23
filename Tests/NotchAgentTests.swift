@@ -22,6 +22,7 @@ enum NotchAgentTests {
         CopilotAgentTests.run(suite)
         CursorAgentTests.run(suite)
         HarnessReaderContractTests.run(suite)
+        PiUsageTests.run(suite)
         timestamps(suite)
         summary(suite)
         AgentUsageSummaryCacheTests.run(suite)

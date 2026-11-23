@@ -24,7 +24,7 @@ enum AgentUsageArchive {
 
     private static let fileName = "agent-usage.bin"
     private static let magic: [UInt8] = Array("VAUA".utf8)
-    private static let format = 8
+    private static let format = 9
 
     /// The parser and the store change between versions; what one build
     /// read is not taken for what another would have.
@@ -317,6 +317,7 @@ enum AgentUsageArchive {
             tokens(value.tokens)
             optional(value.cost) { $0.double($1) }
             double(value.savings)
+            bool(value.reportedCost)
         }
 
         mutating func limits(_ value: AgentLimits) {
@@ -504,7 +505,7 @@ enum AgentUsageArchive {
             AgentUsageRecord(provider: try provider(), date: try date(), model: try string(), project: try string(),
                              session: try string(), requests: try amount(),
                              tokens: try tokens(), cost: try optional { try $0.double() },
-                             savings: try double())
+                             savings: try double(), reportedCost: try bool())
         }
 
         mutating func limits() throws -> AgentLimits {

@@ -124,7 +124,7 @@ final class AgentUsageService: ObservableObject {
     func syncWithPreferences() {
         CodexProfileLimitsService.shared.synchronize()
         guard NotchAgentSupport.isEnabled() else { stop(); return }
-        let wanted = NotchAgentSupport.providers()
+        let wanted = NotchAgentSupport.readers()
         let profile = ClaudeAccountProfile.selected()
         let showingPage = pageVisible
         // An agent turned off is no longer read at all, and one turned on is
