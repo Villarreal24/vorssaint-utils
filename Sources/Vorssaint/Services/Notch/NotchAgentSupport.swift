@@ -338,6 +338,8 @@ enum NotchAgentSupport {
             // the card names once others have cards.
             case .resets: return providers.contains(.codex)
                 ? [NotchAgentTile(card: .resets, provider: .codex, namesDefaultAccount: !codexAccounts.isEmpty)] : []
+            // Claude Code and Pi are the harnesses it compares.
+            case .harnesses: return providers.contains(.claude) ? [NotchAgentTile(card: .harnesses, provider: nil)] : []
             case .live:
                 let working = snapshot.live.contains { providers.contains($0.provider) }
                 return [NotchAgentTile(card: .live, provider: nil, idleProviderCount: working ? 0 : providers.count)]
